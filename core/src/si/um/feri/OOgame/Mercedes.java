@@ -46,7 +46,7 @@ public class Mercedes extends GameObjectDynamic {
         bounds.x = touchPos.x - bounds.width / 2f;
         if (bounds.x < 0) bounds.x = 0;
         if (bounds.x > Gdx.graphics.getWidth() - bounds.width) bounds.x = Gdx.graphics.getWidth() - bounds.width;
-        // TODO: add screen width limit
+
     }
 
     private void commandMoveLeftCorner() {

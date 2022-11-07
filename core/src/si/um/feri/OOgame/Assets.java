@@ -13,6 +13,7 @@ public class Assets {
     public static Texture mercedesImage;
     public static Texture policeCarImage;
     public static Texture bulletImage;
+    public static Texture redBullImage;
     public static Texture background1;
     public static Texture background2;
 
@@ -21,6 +22,7 @@ public class Assets {
     public static Sound astronautSound;
     public static Sound laserSound;
     public static Sound crashSound;
+    public static Sound powerUpSound;
 
     public static BitmapFont font;
 
@@ -32,6 +34,7 @@ public class Assets {
         girlImage3 = new Texture(Gdx.files.internal("girl3.png"));
         policeCarImage = new Texture(Gdx.files.internal("police-car.png"));
         bulletImage = new Texture(Gdx.files.internal("bullet.png"));
+        redBullImage = new Texture(Gdx.files.internal("redbull.png"));
 
         girlImages = new Array<Texture>();
         girlImages.add(girlImage1);
@@ -44,6 +47,7 @@ public class Assets {
         astronautSound = Gdx.audio.newSound(Gdx.files.internal("pick.wav"));
         laserSound = Gdx.audio.newSound(Gdx.files.internal("laser.wav"));
         crashSound = Gdx.audio.newSound(Gdx.files.internal("crash.wav"));
+        powerUpSound = Gdx.audio.newSound(Gdx.files.internal("powerupsound.wav"));
 
         font = new BitmapFont();
         font.getData().setScale(2);
