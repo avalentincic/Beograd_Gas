@@ -36,6 +36,7 @@ public class BeogradGasGame extends ApplicationAdapter {
     private final Pool<PoliceCar> policeCarPool = Pools.get(PoliceCar.class, 10);
     private final Pool<Girl> girlPool = Pools.get(Girl.class, 10);
     private final Pool<PowerUp> powerUpPool = Pools.get(PowerUp.class, 10);
+    private final Pool<Bullet> bulletPool = Pools.get(Bullet.class, 10);
 
     private State state = State.RUN;
 
@@ -66,6 +67,7 @@ public class BeogradGasGame extends ApplicationAdapter {
         policeCarPool.fill(5);
         girlPool.fill(5);
         powerUpPool.fill(5);
+        bulletPool.fill(5);
 
 
     }
@@ -179,7 +181,14 @@ public class BeogradGasGame extends ApplicationAdapter {
             if (act.bounds.overlaps(mercedes.bounds)) act.updateScore(gameObjectScore, it);
             for (Iterator<Bullet> blIt = bullets.iterator(); blIt.hasNext();) {
                 Bullet bl = blIt.next();
-                if (act.bounds.overlaps(bl.bounds) && act instanceof PoliceCar) { it.remove(); blIt.remove(); }
+                if (bl.bounds.y - bl.bounds.height > height) {
+                    blIt.remove();
+                    bulletPool.free(bl);
+                }
+                if (act.bounds.overlaps(bl.bounds) && act instanceof PoliceCar) { it.remove(); blIt.remove();
+                    policeCarPool.free((PoliceCar) act);
+                    bulletPool.free(bl);
+                }
             }
         }
     }
@@ -235,12 +244,12 @@ public class BeogradGasGame extends ApplicationAdapter {
     }
 
     private void commandShoot() {
-        bullets.add(new Bullet(
+        Bullet b = bulletPool.obtain();
+        b.init(
                 mercedes.bounds.x + Assets.mercedesImage.getWidth() / 2f,
-                mercedes.bounds.y + Assets.mercedesImage.getHeight(),
-                Assets.bulletImage.getWidth(),
-                Assets.bulletImage.getHeight()
-        ));
+                mercedes.bounds.y + Assets.mercedesImage.getHeight()
+        );
+        bullets.add(b);
         Assets.laserSound.play();
     }
 
