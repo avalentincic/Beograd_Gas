@@ -14,7 +14,7 @@ public class Ball extends Circle {
         SPEED += 10 * deltaTime;
         this.y -= SPEED;
         if (this.y - this.radius < 0) {
-            SPEED = -SPEED * 0.8;
+            SPEED = -SPEED * 0.75;
             this.y = this.radius;
         }
 

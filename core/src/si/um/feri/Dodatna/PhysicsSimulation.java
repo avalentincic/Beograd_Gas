@@ -5,6 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
@@ -17,13 +19,17 @@ import com.badlogic.gdx.utils.TimeUtils;
 import java.util.Iterator;
 
 public class PhysicsSimulation extends ApplicationAdapter {
+    private Texture wheelImage;
     private SpriteBatch batch;
+    private Sprite sprite;
     private ShapeRenderer shapeRenderer;
     private OrthographicCamera camera;
     static float width;
     static float height;
     private Array<Ball> balls;
-    private int SPEED = 200;
+    private float SPEED = 100;
+    private float ROTATION = 2;
+    private Wheel wheel;
 
     @Override
     public void create(){
@@ -35,7 +41,11 @@ public class PhysicsSimulation extends ApplicationAdapter {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
+        wheelImage = new Texture(Gdx.files.internal("wheel.png"));
+        sprite = new Sprite(wheelImage);
+
         balls = new Array<Ball>();
+        //wheel = new Wheel(0,0);
     }
 
     @Override
@@ -49,6 +59,8 @@ public class PhysicsSimulation extends ApplicationAdapter {
         for (Ball ball : balls) {
             ball.update(Gdx.graphics.getDeltaTime());
         }
+
+        //wheel.update(Gdx.graphics.getDeltaTime(), width);
 
         // tell the camera to update its matrices.
         camera.update();
@@ -65,10 +77,16 @@ public class PhysicsSimulation extends ApplicationAdapter {
             }
         }
         shapeRenderer.end();
+
+        batch.begin();
+        sprite.draw(batch);
+        batch.end();
+        rotateSprite();
     }
 
     @Override
     public void dispose(){
+        shapeRenderer.dispose();
         batch.dispose();
     }
 
@@ -83,5 +101,22 @@ public class PhysicsSimulation extends ApplicationAdapter {
         camera.unproject(touchPos); // transform the touch/mouse coordinates to our camera's coordinate system
         spawnBall(touchPos.x, touchPos.y);
 
+    }
+
+    private void rotateSprite(){
+        float x = sprite.getX();
+        float rotation = sprite.getRotation();
+        rotation -= ROTATION;
+        sprite.setRotation(rotation);
+        x+= SPEED*Gdx.graphics.getDeltaTime();
+        sprite.setX(x);
+        if(sprite.getX() + sprite.getWidth() >= width){
+            SPEED = -SPEED;
+            ROTATION = -ROTATION;
+        }
+        if (sprite.getX() <= 0 && SPEED < 0){
+            SPEED = -SPEED;
+            ROTATION = -ROTATION;
+        }
     }
 }
