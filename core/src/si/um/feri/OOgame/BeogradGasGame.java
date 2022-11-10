@@ -167,13 +167,13 @@ public class BeogradGasGame extends ApplicationAdapter {
         for (Iterator<GameObjectDynamic> it = dynamicActors.iterator(); it.hasNext();) {
             GameObjectDynamic act = it.next();
             if (act.bounds.y + act.bounds.height < 0) {
-                if (it instanceof Girl){
+                if (act instanceof Girl){
                     girlPool.free((Girl) act);
                 }
-                if (it instanceof PoliceCar){
+                if (act instanceof PoliceCar){
                     policeCarPool.free((PoliceCar) act);
                 }
-                if (it instanceof PowerUp){
+                if (act instanceof PowerUp){
                     powerUpPool.free((PowerUp) act);
                 }
                 it.remove();
@@ -269,13 +269,13 @@ public class BeogradGasGame extends ApplicationAdapter {
             gameObjectScore.setGirlsRescuedScore(0);
             for (Iterator<GameObjectDynamic> it = dynamicActors.iterator(); it.hasNext();) {
                 GameObjectDynamic act = it.next();
-                if (it instanceof Girl){
+                if (act instanceof Girl){
                     girlPool.free((Girl) act);
                 }
-                if (it instanceof PoliceCar){
+                if (act instanceof PoliceCar){
                     policeCarPool.free((PoliceCar) act);
                 }
-                if (it instanceof PowerUp){
+                if (act instanceof PowerUp){
                     powerUpPool.free((PowerUp) act);
                 }
                 it.remove();
