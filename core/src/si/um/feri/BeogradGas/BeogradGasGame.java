@@ -15,6 +15,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.Iterator;
 
@@ -52,15 +54,16 @@ public class BeogradGasGame extends ApplicationAdapter {
     private static final long CREATE_POLICE_CAR_TIME = 2000000000;    // ns
     private static float BACKGROUND_VELOCITY = 2;
     private static float BACKGROUND_Y = 0;
-    private float SCREEN_HEIGHT;
-    private float SCREEN_WIDTH;
+
+    private Viewport viewport;
+    private Viewport hudViewport;
+
+    private float WORLD_HEIGHT = 600f;
+    private float WORLD_WIDTH = 800f;
 
 
     @Override
     public void create() {
-
-        SCREEN_HEIGHT = Gdx.graphics.getHeight();
-        SCREEN_WIDTH = Gdx.graphics.getWidth();
 
         font = new BitmapFont();
         font.getData().setScale(2);
@@ -86,12 +89,14 @@ public class BeogradGasGame extends ApplicationAdapter {
 
         // create the camera and the SpriteBatch
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        viewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+        hudViewport = new FitViewport(WORLD_WIDTH, WORLD_HEIGHT);
+        camera.setToOrtho(false, viewport.getWorldWidth(), viewport.getWorldHeight());
         batch = new SpriteBatch();
 
         // create a Rectangle to logically represents the car
         mercedes = new Rectangle();
-        mercedes.x = Gdx.graphics.getWidth() / 2f - carImage.getWidth() / 2f;    // center the mercedes horizontally
+        mercedes.x = viewport.getWorldWidth() / 2f - carImage.getWidth() / 2f;    // center the mercedes horizontally
         mercedes.y = 20;    // bottom left corner of mercedes is 20 pixels above the bottom screen edge
         mercedes.width = carImage.getWidth();
         mercedes.height = carImage.getHeight();
@@ -102,6 +107,12 @@ public class BeogradGasGame extends ApplicationAdapter {
         // add first mercedes and policecar
         spawnGirl();
         spawnPoliceCar();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
+        hudViewport.update(width, height, true);
     }
 
     /**
@@ -115,15 +126,15 @@ public class BeogradGasGame extends ApplicationAdapter {
 
         // draw background
         batch.begin();
-        batch.draw(background1, 0, BACKGROUND_Y, SCREEN_WIDTH, SCREEN_HEIGHT);
-        batch.draw(background2, 0, BACKGROUND_Y+SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
+        batch.draw(background1, 0, BACKGROUND_Y, viewport.getWorldWidth(), viewport.getWorldHeight());
+        batch.draw(background2, 0, BACKGROUND_Y+ viewport.getWorldHeight(), viewport.getWorldWidth(), viewport.getWorldHeight());
         batch.end();
 
         // move background vertically
         BACKGROUND_Y -= BACKGROUND_VELOCITY;
 
         // re-draw background
-        if(BACKGROUND_Y + SCREEN_HEIGHT == 0){
+        if(BACKGROUND_Y + viewport.getWorldHeight() == 0){
             BACKGROUND_Y = 0;
         }
 
@@ -172,7 +183,7 @@ public class BeogradGasGame extends ApplicationAdapter {
                 for (Iterator<Rectangle> it = bullets.iterator(); it.hasNext(); ) {
                     Rectangle bullet = it.next();
                     bullet.y += SPEED_GIRL * Gdx.graphics.getDeltaTime();
-                    if (bullet.y + bulletImage.getHeight() > SCREEN_HEIGHT) it.remove();
+                    if (bullet.y + bulletImage.getHeight() > WORLD_HEIGHT) it.remove();
                     //collision detection between bullets and policeCars
                     for (Iterator<Rectangle> it1 = policeCars.iterator(); it1.hasNext();){
                         if (bullet.overlaps(it1.next())) {
@@ -188,7 +199,7 @@ public class BeogradGasGame extends ApplicationAdapter {
             batch.begin();
             {
                 font.setColor(Color.RED);
-                font.draw(batch, "The END", Gdx.graphics.getHeight() / 2f, Gdx.graphics.getHeight() / 2f);
+                font.draw(batch, "The END", hudViewport.getWorldWidth()  / 2f - 50, hudViewport.getWorldHeight() / 2f);
                 BACKGROUND_VELOCITY = 0;
             }
             batch.end();
@@ -219,9 +230,9 @@ public class BeogradGasGame extends ApplicationAdapter {
             }
 
             font.setColor(Color.YELLOW);
-            font.draw(batch, "" + girlsPickedScore, Gdx.graphics.getWidth() - 50, Gdx.graphics.getHeight() - 20);
+            font.draw(batch, "" + girlsPickedScore, hudViewport.getWorldWidth() - 50, hudViewport.getWorldHeight() - 20);
             font.setColor(Color.GREEN);
-            font.draw(batch, "" + mercedesHealth, 20, Gdx.graphics.getHeight() - 20);
+            font.draw(batch, "" + mercedesHealth, 20, hudViewport.getWorldHeight() - 20);
         }
         batch.end();
     }
@@ -246,8 +257,8 @@ public class BeogradGasGame extends ApplicationAdapter {
 
     private void spawnGirl() {
         Rectangle girl = new Rectangle();
-        girl.x = MathUtils.random(0, Gdx.graphics.getWidth() - girl1Image.getWidth());
-        girl.y = Gdx.graphics.getHeight();
+        girl.x = MathUtils.random(0, viewport.getWorldWidth() - girl1Image.getWidth());
+        girl.y = viewport.getWorldHeight();
         girl.width = girl1Image.getWidth();
         girl.height = girl1Image.getHeight();
         girls.add(girl);
@@ -256,8 +267,8 @@ public class BeogradGasGame extends ApplicationAdapter {
 
     private void spawnPoliceCar() {
         Rectangle policeCar = new Rectangle();
-        policeCar.x = MathUtils.random(0, Gdx.graphics.getWidth() - policeCarImage.getWidth());
-        policeCar.y = Gdx.graphics.getHeight();
+        policeCar.x = MathUtils.random(0, viewport.getWorldWidth() - policeCarImage.getWidth());
+        policeCar.y = viewport.getWorldHeight();
         policeCar.width = policeCarImage.getWidth();
         policeCar.height = policeCarImage.getHeight();
         policeCars.add(policeCar);
@@ -271,8 +282,8 @@ public class BeogradGasGame extends ApplicationAdapter {
 
     private void commandMoveRight() {
         mercedes.x += SPEED * Gdx.graphics.getDeltaTime();
-        if (mercedes.x > Gdx.graphics.getWidth() - carImage.getWidth())
-            mercedes.x = Gdx.graphics.getWidth() - carImage.getWidth();
+        if (mercedes.x > viewport.getWorldWidth() - carImage.getWidth())
+            mercedes.x = viewport.getWorldWidth() - carImage.getWidth();
     }
 
     private void commandMoveLeftCorner() {
@@ -280,7 +291,7 @@ public class BeogradGasGame extends ApplicationAdapter {
     }
 
     private void commandMoveRightCorner() {
-        mercedes.x = Gdx.graphics.getWidth() - carImage.getWidth();
+        mercedes.x = viewport.getWorldWidth() - carImage.getWidth();
     }
 
     private void commandTouched() {
