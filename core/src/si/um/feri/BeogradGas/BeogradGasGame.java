@@ -126,6 +126,7 @@ public class BeogradGasGame extends ApplicationAdapter {
         if(BACKGROUND_Y + SCREEN_HEIGHT == 0){
             BACKGROUND_Y = 0;
         }
+
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) commandExitGame();
 
         // check if we need to create a new girl/police car
@@ -135,7 +136,7 @@ public class BeogradGasGame extends ApplicationAdapter {
         if (mercedesHealth > 0) {    // is game end?
 
             // process user input
-            if (Gdx.input.isTouched()) commandTouched();    // mouse or touch screen
+            //if (Gdx.input.isTouched()) commandTouched();    // mouse or touch screen
             if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) commandMoveLeft();
             if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) commandMoveRight();
             if (Gdx.input.isKeyPressed(Input.Keys.A)) commandMoveLeftCorner();
@@ -234,6 +235,8 @@ public class BeogradGasGame extends ApplicationAdapter {
         policeCarImage.dispose();
         carImage.dispose();
         pickSound.dispose();
+        crashSound.dispose();
+        laserSound.dispose();
         batch.dispose();
         font.dispose();
         background1.dispose();
