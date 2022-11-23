@@ -1,6 +1,11 @@
 package si.um.feri.OOgame;
 
+import static si.um.feri.OOgame.Assets.bulletImage;
 import static si.um.feri.OOgame.Assets.font;
+import static si.um.feri.OOgame.Assets.girlImage1;
+import static si.um.feri.OOgame.Assets.mercedesImage;
+import static si.um.feri.OOgame.Assets.policeCarImage;
+import static si.um.feri.OOgame.Assets.redBullImage;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -8,16 +13,23 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.Pools;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.Iterator;
+
+import si.um.feri.util.ViewportUtils;
+import si.um.feri.util.debug.DebugCameraController;
+import si.um.feri.util.debug.MemoryInfo;
 
 public class BeogradGasGame extends ApplicationAdapter {
     private SpriteBatch batch;
@@ -40,6 +52,14 @@ public class BeogradGasGame extends ApplicationAdapter {
 
     private State state = State.RUN;
 
+    //debug
+    private DebugCameraController debugCameraController;
+    private MemoryInfo memoryInfo;
+    private boolean debug = false;
+
+    private ShapeRenderer shapeRenderer;
+    public Viewport viewport;
+
 
     @Override
     public void create() {
@@ -47,6 +67,7 @@ public class BeogradGasGame extends ApplicationAdapter {
         //Gdx.app.setLogLevel(Logger.DEBUG);
         width = Gdx.graphics.getWidth();
         height = Gdx.graphics.getHeight();
+
         gameObjectScore = new Score(0,0, width, height, 0, 100);
         //gameObjectEnd = new GameObjectEnd(0,0, width, height);
         bullets = new Array<Bullet>();
@@ -55,6 +76,15 @@ public class BeogradGasGame extends ApplicationAdapter {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch = new SpriteBatch();
+
+        // debug
+        debugCameraController = new DebugCameraController();
+        debugCameraController.setStartPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f);
+        memoryInfo = new MemoryInfo(500);
+
+        shapeRenderer = new ShapeRenderer();
+        viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+
 
         // create a Rectangle to logically represents Mercedes
         mercedes = new Mercedes(
@@ -69,7 +99,6 @@ public class BeogradGasGame extends ApplicationAdapter {
         powerUpPool.fill(5);
         bulletPool.fill(5);
 
-
     }
 
     /**
@@ -80,6 +109,8 @@ public class BeogradGasGame extends ApplicationAdapter {
         //clear screen
         Gdx.gl.glClearColor(0, 0, 0f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) debug = !debug;
 
         // tell the camera to update its matrices.
         camera.update();
@@ -210,6 +241,50 @@ public class BeogradGasGame extends ApplicationAdapter {
             gameObjectScore.render(batch);
         }
         batch.end();
+
+
+        if (debug) {
+            debugCameraController.handleDebugInput(Gdx.graphics.getDeltaTime());
+            memoryInfo.update();
+            debugCameraController.applyTo(camera);
+            batch.begin();
+            {
+                // the average number of frames per second
+                GlyphLayout layout = new GlyphLayout(font, "FPS:" + Gdx.graphics.getFramesPerSecond());
+                font.setColor(Color.YELLOW);
+                font.draw(batch, layout, Gdx.graphics.getWidth() - layout.width, Gdx.graphics.getHeight() - 50);
+
+                // number of rendering calls, ever; will not be reset unless set manually
+                font.setColor(Color.YELLOW);
+                font.draw(batch, "RC:" + batch.totalRenderCalls, Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 20);
+
+                memoryInfo.render(batch, font);
+            }
+            batch.end();
+
+            batch.totalRenderCalls = 0;
+            ViewportUtils.drawGrid(viewport, shapeRenderer, 50);
+
+
+            // print rectangles
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            // https://libgdx.badlogicgames.com/ci/nightlies/docs/api/com/badlogic/gdx/graphics/glutils/ShapeRenderer.html
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            {
+                shapeRenderer.setColor(1, 1, 0, 1);
+                for (GameObjectDynamic act : dynamicActors) {
+                    if (act instanceof PoliceCar) shapeRenderer.rect(act.bounds.getX(), act.bounds.getY(), policeCarImage.getWidth(), policeCarImage.getHeight());
+                    if (act instanceof Girl) shapeRenderer.rect(act.bounds.getX(), act.bounds.getY(), girlImage1.getWidth(), girlImage1.getHeight());
+                    if (act instanceof PowerUp) shapeRenderer.rect(act.bounds.getX(), act.bounds.getY(), redBullImage.getWidth(), redBullImage.getHeight());
+                }
+                for (Bullet bullet : bullets) {
+                    shapeRenderer.rect(bullet.bounds.getX(), bullet.bounds.getY(), bulletImage.getWidth(), bulletImage.getHeight());
+                }
+                shapeRenderer.rect(mercedes.bounds.getX(), mercedes.bounds.getY(), mercedesImage.getWidth(), mercedesImage.getHeight());
+            }
+            shapeRenderer.end();
+
+        }
     }
 
     private void spawnGirl() {
