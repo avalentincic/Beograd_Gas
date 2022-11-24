@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -60,6 +61,9 @@ public class BeogradGasGame extends ApplicationAdapter {
     private ShapeRenderer shapeRenderer;
     public Viewport viewport;
 
+    //particles
+    private ParticleEffect pEffectSmoke;
+    private ParticleEffect pEffectLightRed;
 
     @Override
     public void create() {
@@ -99,6 +103,7 @@ public class BeogradGasGame extends ApplicationAdapter {
         powerUpPool.fill(5);
         bulletPool.fill(5);
 
+        initParticleEffects();
     }
 
     /**
@@ -160,6 +165,8 @@ public class BeogradGasGame extends ApplicationAdapter {
     @Override
     public void dispose() {
         Assets.dispose();
+        pEffectSmoke.dispose();
+        pEffectLightRed.dispose();
         batch.dispose();
     }
 
@@ -185,6 +192,10 @@ public class BeogradGasGame extends ApplicationAdapter {
         mercedes.update(Gdx.graphics.getDeltaTime());
         for (GameObjectDynamic act : dynamicActors) {
             act.update(Gdx.graphics.getDeltaTime());
+            if (act instanceof PoliceCar) {
+                pEffectLightRed.update(Gdx.graphics.getDeltaTime());
+                pEffectLightRed.setPosition(act.bounds.getX() + 15, act.bounds.getY() + 50);
+            }
         }
         for(Bullet bullet: bullets){
             bullet.update(Gdx.graphics.getDeltaTime());
@@ -222,6 +233,8 @@ public class BeogradGasGame extends ApplicationAdapter {
                 }
             }
         }
+        pEffectSmoke.update(Gdx.graphics.getDeltaTime());
+        pEffectSmoke.setPosition(mercedes.bounds.getX() + 12, mercedes.bounds.getY());
     }
 
     public void draw(){
@@ -232,6 +245,7 @@ public class BeogradGasGame extends ApplicationAdapter {
             mercedes.render(batch);
             for (GameObjectDynamic act : dynamicActors) {
                 act.render(batch);
+                if (act instanceof PoliceCar) pEffectLightRed.draw(batch);
             }
 
             for(Bullet bullet: bullets){
@@ -239,6 +253,7 @@ public class BeogradGasGame extends ApplicationAdapter {
             }
 
             gameObjectScore.render(batch);
+            pEffectSmoke.draw(batch);
         }
         batch.end();
 
@@ -359,5 +374,15 @@ public class BeogradGasGame extends ApplicationAdapter {
             PoliceCar.setSpeedPoliceCar(200);
             BACKGROUND_Y = 0;
         }
+    }
+
+    private void initParticleEffects() {
+        pEffectSmoke = new ParticleEffect();
+        pEffectSmoke.load(Gdx.files.internal("smoke.pe"), Gdx.files.internal(("")));
+        pEffectSmoke.setPosition(mercedes.bounds.getX() + 12, mercedes.bounds.getY());
+
+        pEffectLightRed = new ParticleEffect();
+        pEffectLightRed.load(Gdx.files.internal("light_red.pe"), Gdx.files.internal(("")));
+
     }
 }
