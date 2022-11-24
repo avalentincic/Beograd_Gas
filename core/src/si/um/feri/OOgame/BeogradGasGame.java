@@ -194,7 +194,7 @@ public class BeogradGasGame extends ApplicationAdapter {
             act.update(Gdx.graphics.getDeltaTime());
             if (act instanceof PoliceCar) {
                 pEffectLightRed.update(Gdx.graphics.getDeltaTime());
-                pEffectLightRed.setPosition(act.bounds.getX() + 15, act.bounds.getY() + 50);
+                pEffectLightRed.setPosition(act.bounds.getX() + 8, act.bounds.getY() + 38);
             }
         }
         for(Bullet bullet: bullets){
