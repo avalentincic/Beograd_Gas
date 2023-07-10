@@ -8,7 +8,7 @@ Simple 2D game for "Game Developement" class using [LibGDX](https://libgdx.com/)
 - Girls
 - Car health
 - Score (number of girls picked)
-- Zvok
+- Sound
 
 ## Dynamics
 
