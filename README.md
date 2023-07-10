@@ -24,3 +24,6 @@ Simple 2D game for "Game Developement" class using [LibGDX](https://libgdx.com/)
 - Collect girls by touching them with the car.
 - Colliding with a police car causes damage (loss of health points).
 - Collision between a bullet (fired by pressing spacebar key) and a police car results in a destruction of police car.
+
+## Screenshot
+![Screenshot](https://github.com/avalentincic/Beograd_Gas/assets/93095625/db4549e8-59cd-44f5-a3ab-b7becb97a6d8)
